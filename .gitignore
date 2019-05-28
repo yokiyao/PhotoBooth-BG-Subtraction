@@ -1,0 +1,17 @@
+Library/
+obj/
+Packages/
+Temp/
+Assets/Plugins
+Assets/DoozyUI
+Assets/Demigiant
+Assets/saved
+*.meta
+*.gif
+Moments/
+Assets/UniGif
+*.csproj
+*.sln
+.vs
+Assembly-CSharp.csproj
+

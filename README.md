@@ -1,2 +1,5 @@
-# PhotoBooth-BG-Subtraction
-Unity
+# Webcam-BG-Subtraction
+
+- plugins using:
+- doozyui
+- zxing
