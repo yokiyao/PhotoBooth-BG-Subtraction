@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+using Klak.Video;
 public class DBUploader : MonoBehaviour {
 
 
@@ -11,24 +11,31 @@ public class DBUploader : MonoBehaviour {
     [HideInInspector]  public string PHP_url;
  
     public string status = "";
-
+    ProcAmp pa;
+    bool isInDebugMode;
     private void Awake()
     {
         StartCoroutine(CheckConnection());
 
     }
 
-   
+    private void Start()
+    {
+        pa = GetComponent<ProcAmp>();
+        isInDebugMode = pa.isInDebugMode;
+    }
+
+
 
     public IEnumerator CheckConnection()
     {
         status = "";
         WWWForm form = new WWWForm();
         form.AddField("function", "CheckConnection");
-        form.AddField("filePath", "testConnection  " + System.DateTime.Now);
+        form.AddField("photoFilePath", "testConnection  " + System.DateTime.Now);
         
         PHP_url = ipAddress + PHP_filePath;
-        Debug.Log("PHP url: " + PHP_url);
+        if (isInDebugMode) Debug.Log("PHP url: " + PHP_url);
         using (var w = new WWW(PHP_url, form))
         {
             yield return w;
@@ -36,13 +43,13 @@ public class DBUploader : MonoBehaviour {
             if (w.error != null)
             {
                 status = "Fail";
-                Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "      status: " + status + "  error: " + w.error );
+                if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "      status: " + status + "  error: " + w.error );
                 //Debug.Log("not ok");
             }
             else
             {
                 status = "Good";
-                Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + w.text + "      status: " + status);
+                if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + w.text + "      status: " + status);
             }
         }
     }
@@ -73,12 +80,12 @@ public class DBUploader : MonoBehaviour {
             yield return w;
             if (w.error != null)
             {
-                Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + w.error);
+                if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + w.error);
             }
             else
             {
-                
-                Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + w.text);
+
+                if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + w.text);
             }
         }
     }

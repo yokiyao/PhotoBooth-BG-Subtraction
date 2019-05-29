@@ -5,13 +5,22 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using Klak.Video;
 
 public class FileUploader : MonoBehaviour {
 
     
 
     string[] fileInfo;
-    
+
+    ProcAmp pa;
+    bool isInDebugMode;
+    private void Start()
+    {
+        pa = GetComponent<ProcAmp>();
+        isInDebugMode = pa.isInDebugMode;
+    }
+
 
 
     public IEnumerator UploadPNG(byte[] bytes, string fileName)
@@ -24,7 +33,7 @@ public class FileUploader : MonoBehaviour {
 
         if (!(localFile.Length > 0))
         {
-            Debug.Log("localFile length < 0 ");
+            if(isInDebugMode) Debug.Log("localFile length < 0 ");
             yield break; // stop the coroutine here
         }
 
@@ -38,11 +47,11 @@ public class FileUploader : MonoBehaviour {
             yield return w.SendWebRequest();
             if (w.isNetworkError || w.isHttpError)
             {
-                print(w.error);
+                if (isInDebugMode) Debug.Log(w.error);
             }
             else
             {
-                print("Finished Uploading image");
+                if (isInDebugMode) Debug.Log("Finished Uploading image");
             }
         }
 
@@ -58,7 +67,7 @@ public class FileUploader : MonoBehaviour {
 
         if (!(localFile.Length > 0))
         {
-            Debug.Log("localFile length < 0 ");
+            if (isInDebugMode) Debug.Log("localFile length < 0 ");
             yield break; // stop the coroutine here
         }
 
@@ -72,11 +81,11 @@ public class FileUploader : MonoBehaviour {
             yield return w.SendWebRequest();
             if (w.isNetworkError || w.isHttpError)
             {
-                print(w.error);
+                if (isInDebugMode) Debug.Log(w.error);
             }
             else
             {
-                print("Finished Uploading gif");
+                if (isInDebugMode) Debug.Log("Finished Uploading gif");
             }
         }
 

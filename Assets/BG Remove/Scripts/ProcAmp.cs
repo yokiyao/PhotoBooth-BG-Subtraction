@@ -384,6 +384,7 @@ namespace Klak.Video
          *    -9:  End page
          *    -10: Color Adjustment
          *    -11: Photo ot Gif
+         *    -12: Keyboard
         */
         public UIButton[] UIB;
         /*
@@ -443,13 +444,18 @@ namespace Klak.Video
         public bool isEnterColorAdjustment = false;
 
         Recorder m_recorder;
-        UniGifTest m_uniGifTest;
+        //UniGifTest m_uniGifTest;
 
         AnimationSequence m_animationSequence;
+
+        KeyboardInput m_keyboardInput;
+
+        public bool isInDebugMode = false;
         void Start()
         {
+            m_keyboardInput = GetComponent<KeyboardInput>();
             m_recorder = GetComponent<Recorder>();
-            m_uniGifTest = GetComponent<UniGifTest>();
+            //m_uniGifTest = GetComponent<UniGifTest>();
             m_animationSequence = GetComponent<AnimationSequence>();
             gifRecordTime = m_recorder.m_BufferSize;  //Record time
 
@@ -489,21 +495,21 @@ namespace Klak.Video
                
                 if (countdownTimer < 2 && !isTimerReachTwo)
                 {
-                    //Debug.Log("timer < 2");
+                    
                     isTimerReachTwo = true;
                     countdownImage.sprite = countdownTextures[1];
 
                 }
                 if (countdownTimer < 1 && !isTimerReachOne)
                 {
-                    //Debug.Log("timer < 1");
+              
                     isTimerReachOne = true;
                     countdownImage.sprite = countdownTextures[0];
 
                 }
                 if (countdownTimer < 0 && !isTimerReachZero)
                 {
-                    //Debug.Log("timer < 0");
+                   
                     isTimerReachZero = true;
                     isCountdownTimerStarted = false;
                     UIE[3].Hide(false);  //UIE_Countdown
@@ -621,6 +627,17 @@ namespace Klak.Video
                     
             }
 
+            if (emailInputfield.isFocused)
+            {
+                if (!UIE[12].isVisible)  UIE[12].Show(false);
+                EnbaleKeyBoardFunction();
+            }
+
+        }
+
+        void EnbaleKeyBoardFunction()
+        {
+            
         }
 
         void OnDestroy()
@@ -643,7 +660,7 @@ namespace Klak.Video
         public void ChooseShootingPhoto()
         {
             processCircleImage.fillAmount = 0;
-            isEnterActiveCamera = true;
+            
             shootImage.sprite = shootTexture_camera;
             photoOrGif = 0;
             isShot = false;
@@ -652,13 +669,14 @@ namespace Klak.Video
         public void ChooseShootingGIF()
         {
             m_animationSequence.SwitchTargetToShotImage();
-            isEnterActiveCamera = true;
+            
             shootImage.sprite = shootTextrue_video;
             photoOrGif = 1;
             processCircleImage.fillAmount = 0;
             isShot = false;
         }
 
+        
 
         void TakeAndShowthePhoto()
         {
@@ -677,7 +695,6 @@ namespace Klak.Video
             UIE[2].Hide(false); //UIE_ActiveCamera
             UIE[4].Show(false); //UIE_PhotoPart
 
-            //Debug.Log(myTexture.format);
 
         }
        
@@ -702,7 +719,7 @@ namespace Klak.Video
            
         }
 
-        bool isStartLoadGif = false;
+        //bool isStartLoadGif = false;
 
         FileInfo fileinfo;
         
@@ -713,10 +730,11 @@ namespace Klak.Video
                 yield return null;
             }
 
-            Debug.Log("in show gif, after finished recording");
+            if (isInDebugMode) Debug.Log("recorder state == finishedRecording");
+
             m_animationSequence.m_AnimTextures = m_recorder.m_Frames_tex_array;
             //shotRawImage.rectTransform.localScale = new Vector3(m_recorder.m_Width / 1920, m_recorder.m_Height / 1080, 1);
-            Debug.Log(m_recorder.m_Width / 1920 + "       " + m_recorder.m_Height / 1080);
+           
             m_animationSequence.PlayLoop();
             UIE[2].Hide(false); //UIE_ActiveCamera
             UIE[4].Show(false); //UIE_PhotoPart
@@ -733,31 +751,31 @@ namespace Klak.Video
 
             while (m_recorder.State != RecorderState.Paused)
             {
-                Debug.Log("inside pause");
-                
+                if (isInDebugMode) Debug.Log("recorder state == " + m_recorder.State);
                 yield return null;
             }
 
-            Debug.Log("after showgif - state != paused     " + gifFilepath);
-            Debug.Log("see if existed" + File.Exists(gifFilepath));
+            if (isInDebugMode) Debug.Log("recorder state == " + m_recorder.State + "  gif is going to:  " + gifFilepath);
+           
 
             while (!File.Exists(gifFilepath))
             {
-                Debug.Log("not exist");
+                if (isInDebugMode) Debug.Log("the gif does not exist");
                 yield return null;
             }
 
-            Debug.Log(" exist !!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            if (isInDebugMode) Debug.Log("the gif is there");
 
             fileinfo = new FileInfo(gifFilepath);
 
+
             while (IsFileLocked(fileinfo))
             {
-                Debug.Log("locked");
+                if (isInDebugMode) Debug.Log("the gif is locked (being written)");
                 yield return null;
             }
 
-            Debug.Log(" not locked !!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            if (isInDebugMode) Debug.Log("the gif is not locked (finished written)");
 
             gifloadingImage.GetComponent<CanvasGroup>().alpha = 0;
 
@@ -833,7 +851,7 @@ namespace Klak.Video
         {
             isShot = false;
             //reset some params
-            isStartLoadGif = false;
+            //isStartLoadGif = false;
             processCircleImage.fillAmount = 0;
             //gifloadingImage.GetComponent<CanvasGroup>().alpha = 0;
 
@@ -852,11 +870,12 @@ namespace Klak.Video
 
            
             isEnterActiveCamera = false;
-            CreateEncodedName();
+            
 
             //0: photo 1:gif
             if (photoOrGif == 0)
             {
+                CreateEncodedName();
                 //shooting photo
                 photoFilePath = serverPath + photoTargetFolder + "PB_" + encodedFileName + ".png";
                 qrcodeURLPath = photoTargetFolder + "PB_" + encodedFileName + ".png";
@@ -865,7 +884,7 @@ namespace Klak.Video
                 BinaryWriter binary = new BinaryWriter(file);
                 binary.Write(myTextureBytes);
                 file.Close();
-                Debug.Log(System.DateTime.Now + "   save image to file:  " + photoFilePath);
+                if (isInDebugMode) Debug.Log(System.DateTime.Now + "   save image to file:  " + photoFilePath);
 
                 UploadImage(myTextureBytes);
                 GenerateTheQRCode();
@@ -897,7 +916,7 @@ namespace Klak.Video
         {
             if (isEnterColorAdjustment)
             {
-                Debug.Log("quit picking color");
+                if (isInDebugMode) Debug.Log("quit picking color");
                 isEnterColorAdjustment = false;
                 UIE[10].Hide(false);
                 StartGameTimer();
@@ -1043,7 +1062,7 @@ namespace Klak.Video
             //show color adjustment panel
             if (!isEnterColorAdjustment)
             {
-                //Debug.Log("start to pick color");
+                if (isInDebugMode) Debug.Log("start to pick color");
                 isEnterColorAdjustment = true;
                 UIE[10].Show(false);
                 StopGameTimer();
@@ -1051,7 +1070,7 @@ namespace Klak.Video
             }
             else
             {
-                //Debug.Log("quit picking color");
+                if (isInDebugMode) Debug.Log("quit picking color");
                 isEnterColorAdjustment = false;
                 UIE[10].Hide(false);
                 StartGameTimer();
@@ -1101,6 +1120,7 @@ namespace Klak.Video
         {
             //isEnterActiveCamera = true;
             userPickedIndex = index;
+            isEnterActiveCamera = true;
         }
 
 
@@ -1174,7 +1194,10 @@ namespace Klak.Video
         void ResetTheGame()
         {
             isGameTimerStarted = false;
+            isEnterActiveCamera = false;
+            isShot = false;
             currentGameTimer = 0;
+            m_keyboardInput.ResetContent();
             if (m_animationSequence.m_Playing)
             {
                 m_animationSequence.Stop();

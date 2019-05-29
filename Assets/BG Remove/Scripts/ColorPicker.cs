@@ -6,14 +6,20 @@ namespace Klak.Video
 {
     public class ColorPicker : MonoBehaviour {
 
-        public ProcAmp pa;
+        ProcAmp pa;
 
         Texture2D tex;
         Vector3 mpos;
 
         bool isEnterColorAdjustment;
 
-     
+        bool isInDebugMode;
+
+        private void Start()
+        {
+            pa = GetComponent<ProcAmp>();
+            isInDebugMode = pa.isInDebugMode;
+        }
 
         private void Update()
         {
@@ -47,7 +53,7 @@ namespace Klak.Video
 
             bla = tex.GetPixel((int)mpos.x, (int)mpos.y);
             pa.pickedColor =  bla;
-            Debug.Log("get color: " + bla);
+            if (isInDebugMode) Debug.Log("get color: " + bla);
         }
 
     }
