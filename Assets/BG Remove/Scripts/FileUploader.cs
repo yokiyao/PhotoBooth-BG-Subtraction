@@ -42,12 +42,12 @@ public class FileUploader : MonoBehaviour {
         postForm.AddBinaryData("theFile", localFile, fileName, "image/png");
 
         // Upload to a cgi script
-        using (var w = UnityWebRequest.Post(GetComponent<DBUploader>().PHP_url, postForm))
+        using (var w = UnityWebRequest.Post(pa.PHP_url, postForm))
         {
             yield return w.SendWebRequest();
             if (w.isNetworkError || w.isHttpError)
             {
-                if (isInDebugMode) Debug.Log(w.error);
+                if (isInDebugMode) Debug.Log("file uploader: " + w.error);
             }
             else
             {
@@ -76,7 +76,7 @@ public class FileUploader : MonoBehaviour {
         postForm.AddBinaryData("theFile", localFile, fileName, "image/gif");
 
         // Upload to a cgi script
-        using (var w = UnityWebRequest.Post(GetComponent<DBUploader>().PHP_url, postForm))
+        using (var w = UnityWebRequest.Post(pa.PHP_url, postForm))
         {
             yield return w.SendWebRequest();
             if (w.isNetworkError || w.isHttpError)

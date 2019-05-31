@@ -17,6 +17,9 @@ public class EmailSender : MonoBehaviour {
     ProcAmp pa;
     KeyboardInput m_keyboardinput;
     bool isInDebugMode;
+
+    string emailAddress;
+
     private void Start()
     {
         pa = GetComponent<ProcAmp>();
@@ -25,6 +28,7 @@ public class EmailSender : MonoBehaviour {
     }
     public void SendEmail(string filepath, string filename)
     {
+        
         if (ValidateEmailAddress())
         {
             emailInfoText.text = "";
@@ -45,22 +49,21 @@ public class EmailSender : MonoBehaviour {
     IEnumerator StartSendEmail(string filepath, string filename)
     {
         ShowEndingPage();
-        emailResultText.text = "Email is sending...";
+        //emailResultText.text = "Email is sending...";
         WWWForm form = new WWWForm();
         form.AddField("function", "SendEmail");
-        form.AddField("Receiver", emailInputfield.text);
+        form.AddField("Receiver", emailAddress);
         form.AddField("FilePath", filepath);
         form.AddField("FileName", filename);
         
 
-        PHP_url = GetComponent<DBUploader>().PHP_url;
+        PHP_url = pa.PHP_url;
 
-        if (emailInputfield.text == null)
+        if (emailAddress == null)
         {
             Debug.Log("email is empty");
         }
-        Debug.Log("formadd" + emailInputfield.text.ToString());
-
+       
         
         using (var w = new WWW(PHP_url, form))
         {
@@ -69,17 +72,17 @@ public class EmailSender : MonoBehaviour {
             {
                 status = "Fail";
                 if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "php email status: " + status + "   info: " +  w.error);
-                emailResultText.text = "Fail to send the email. SOS.";
+                //emailResultText.text = "Fail to send the email. SOS.";
             }
             else
             {
                 status = "Good";
-                if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "php email status: " + status + "  send to: " + emailInputfield.text);
+                if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "php email status: " + status + "  send to: " + emailAddress);
                 
-                emailResultText.text = "Email is sent successfully.";
+                //emailResultText.text = "Email is sent successfully.";
                 emailInputfield.text = "";
                 StartCoroutine(ClearLocalFolder());
-                m_keyboardinput.ResetContent();
+               
 
             }
         }
@@ -89,7 +92,7 @@ public class EmailSender : MonoBehaviour {
         WWWForm form = new WWWForm();
         form.AddField("function", "ClearLocalFolder");
 
-        PHP_url = GetComponent<DBUploader>().PHP_url;
+        PHP_url = pa.PHP_url;
 
         using (var w = new WWW(PHP_url, form))
         {
@@ -113,8 +116,10 @@ public class EmailSender : MonoBehaviour {
 
     bool ValidateEmailAddress()
     {
-        Debug.Log("validate: " + emailInputfield.text);
-        if (!mailValidator.IsMatch(emailInputfield.text))
+        if(isInDebugMode) Debug.Log("validate: " + emailInputfield.text);
+
+        emailAddress = emailInputfield.text;
+        if (!mailValidator.IsMatch(emailAddress))
         {
             return false;
         }
@@ -130,7 +135,7 @@ public class EmailSender : MonoBehaviour {
         elementsToShowAndHide[0].Hide(false);
         elementsToShowAndHide[2].Hide(false);
         elementsToShowAndHide[1].Show(false);
-       
+        m_keyboardinput.ResetContent();
     }
 
      

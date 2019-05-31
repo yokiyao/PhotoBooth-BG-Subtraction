@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 using System.IO;
 using System.Collections;
 using DoozyUI;
-
+using UnityEngine.SceneManagement;
 using ZXing;
 using ZXing.QrCode;
 using Moments;
@@ -265,9 +265,15 @@ namespace Klak.Video
                         //return _sourceVideo.texture;
                         return webcamTexture;
                     }
-                       
+
                     else
+                    {
+                        
+                    
                         return _sourceTexture;
+                    }
+                        
+                  
                 else
                     return _offlineTexture;
             }
@@ -280,7 +286,7 @@ namespace Klak.Video
         {
             // Input
             _material.SetTexture("_MainTex", currentSource);
-            _material.SetTexture("_BGTex", backgroundSource[index]);
+            _material.SetTexture("_BGTex", m_animationSequence.textureAtThisFrame);
 
             // Basic adjustment
             _material.SetFloat("_Brightness", _brightness);
@@ -385,6 +391,7 @@ namespace Klak.Video
          *    -10: Color Adjustment
          *    -11: Photo ot Gif
          *    -12: Keyboard
+         *    -13: Bug Page
         */
         public UIButton[] UIB;
         /*
@@ -423,7 +430,7 @@ namespace Klak.Video
         public float currentGameTimer;
         public float idleGameTime = 180;
         string serverPath;
-        string ipAddress;
+       
 
         [HideInInspector] public Color pickedColor;
 
@@ -447,22 +454,47 @@ namespace Klak.Video
         //UniGifTest m_uniGifTest;
 
         AnimationSequence m_animationSequence;
+        AnimationSequence m_BG_animationSequence;
 
         KeyboardInput m_keyboardInput;
 
         public bool isInDebugMode = false;
+
+        INIParser ini;
+
+        public string ipAddress;
+        public string PHP_filePath;
+        public string PHP_url;
+        private void Awake()
+        {
+            ini = new INIParser();
+
+            ini.Open(Application.dataPath + "\\StreamingAssets" + "\\ini\\debug.txt");
+            int boo = ini.ReadValue("App", "isInDebugMode", 0);
+            ipAddress = ini.ReadValue("App", "IPaddress", "http://127.0.0.1/");
+            PHP_filePath = ini.ReadValue("App", "PHP_filePath", "PhotoBooth/PhotoBooth.php");
+            PHP_url = ipAddress + PHP_filePath;
+            if (boo == 0) isInDebugMode = false;
+            else isInDebugMode = true;
+            Debug.Log("isindebugmode: " + ipAddress);
+            
+            ini.Close();
+        }
+
         void Start()
         {
             m_keyboardInput = GetComponent<KeyboardInput>();
             m_recorder = GetComponent<Recorder>();
             //m_uniGifTest = GetComponent<UniGifTest>();
             m_animationSequence = GetComponent<AnimationSequence>();
+            m_BG_animationSequence = GetComponent<AnimationSequence>();
+
             gifRecordTime = m_recorder.m_BufferSize;  //Record time
 
             keyingToggle.isOn = true;
             //targetFolder = @"Assets\saved\";
             serverPath = "C:\\xampp\\htdocs\\";
-            ipAddress = GetComponent<DBUploader>().ipAddress;
+           
             photoTargetFolder = "PhotoBooth\\PB_images\\";
           
             qrcodeTargetFolder = "PhotoBooth\\PB_qrcodes\\";
@@ -483,7 +515,15 @@ namespace Klak.Video
         bool isCameraOpened = false;
 
         void Update()
-        {           
+        {     
+            
+            //if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftShift))
+            //{
+            //    isInDebugMode = true;
+            //    Scene scene = SceneManager.GetActiveScene();
+            //    SceneManager.LoadScene(scene.name);
+            //}
+
             if (isEnterColorAdjustment)
             {
                 EditKeyingParams();
@@ -532,7 +572,7 @@ namespace Klak.Video
 
             if (isEnterActiveCamera )
             {
-                if (Input.GetKeyDown("s") && !isShot)
+                if (Input.GetKeyDown("s") && !isShot && isInDebugMode)
                 {
                     //show color adjustment panel
 
@@ -630,14 +670,22 @@ namespace Klak.Video
             if (emailInputfield.isFocused)
             {
                 if (!UIE[12].isVisible)  UIE[12].Show(false);
-                EnbaleKeyBoardFunction();
+              
             }
 
         }
 
-        void EnbaleKeyBoardFunction()
-        {
-            
+       public void ShowBugPage(string errorMessage)
+       {
+
+
+
+            UIE[13].Show(true); // bug page show without animation
+
+            UIE[13].GetComponentInChildren<Text>().text += "\n" +  errorMessage;
+
+
+
         }
 
         void OnDestroy()
@@ -664,6 +712,7 @@ namespace Klak.Video
             shootImage.sprite = shootTexture_camera;
             photoOrGif = 0;
             isShot = false;
+            m_animationSequence.PlayLoop_AssignToTexture(userPickedIndex);
         }
 
         public void ChooseShootingGIF()
@@ -674,6 +723,7 @@ namespace Klak.Video
             photoOrGif = 1;
             processCircleImage.fillAmount = 0;
             isShot = false;
+            m_animationSequence.PlayLoop_AssignToTexture(userPickedIndex);
         }
 
         
@@ -695,6 +745,7 @@ namespace Klak.Video
             UIE[2].Hide(false); //UIE_ActiveCamera
             UIE[4].Show(false); //UIE_PhotoPart
 
+            m_animationSequence.Stop_AssignToTexture();
 
         }
        
@@ -708,6 +759,7 @@ namespace Klak.Video
 
             gifFilepath_withIP = (ipAddress + gifTargetFolder + "PB_" + encodedFileName + ".gif").Replace("\\", "/");
             GetComponent<Record>().StartRecordingGif(gifFilepath, encodedFileName);
+           
         }
 
         public void StopGifLoop()
@@ -732,6 +784,7 @@ namespace Klak.Video
 
             if (isInDebugMode) Debug.Log("recorder state == finishedRecording");
 
+            m_animationSequence.Stop_AssignToTexture();
             m_animationSequence.m_AnimTextures = m_recorder.m_Frames_tex_array;
             //shotRawImage.rectTransform.localScale = new Vector3(m_recorder.m_Width / 1920, m_recorder.m_Height / 1080, 1);
            
@@ -751,7 +804,7 @@ namespace Klak.Video
 
             while (m_recorder.State != RecorderState.Paused)
             {
-                if (isInDebugMode) Debug.Log("recorder state == " + m_recorder.State);
+                //if (isInDebugMode) Debug.Log("recorder state == " + m_recorder.State);
                 yield return null;
             }
 
@@ -771,7 +824,7 @@ namespace Klak.Video
 
             while (IsFileLocked(fileinfo))
             {
-                if (isInDebugMode) Debug.Log("the gif is locked (being written)");
+                //if (isInDebugMode) Debug.Log("the gif is locked (being written)");
                 yield return null;
             }
 
@@ -856,6 +909,7 @@ namespace Klak.Video
             //gifloadingImage.GetComponent<CanvasGroup>().alpha = 0;
 
             m_animationSequence.Stop();
+            m_animationSequence.PlayLoop_AssignToTexture(userPickedIndex);
 
         }
 
@@ -1116,17 +1170,25 @@ namespace Klak.Video
 
         #region tiny functions
 
+        Texture bgTextureAtThisFrame;
         public void SelectBackground(int index)
         {
             //isEnterActiveCamera = true;
             userPickedIndex = index;
             isEnterActiveCamera = true;
+           
+
+        }
+
+        public void BackToChoose()
+        {
+            m_animationSequence.Stop_AssignToTexture();
         }
 
 
         public void SwitchToNextBG()
         {
-            if (userPickedIndex != backgroundSource.Length - 1)
+            if (userPickedIndex != m_animationSequence.m_BGTexureList.Count - 1)
             {
                 userPickedIndex += 1;
             }
@@ -1134,7 +1196,9 @@ namespace Klak.Video
             {
                 userPickedIndex = 0;
             }
-            _material.SetTexture("_BGTex", backgroundSource[userPickedIndex]);
+            m_animationSequence.Stop_AssignToTexture();
+            m_animationSequence.PlayLoop_AssignToTexture(userPickedIndex);
+            _material.SetTexture("_BGTex", m_animationSequence.textureAtThisFrame);
         }
 
         public void SwitchToLastBG()
@@ -1145,9 +1209,11 @@ namespace Klak.Video
             }
             else
             {
-                userPickedIndex = backgroundSource.Length - 1;
+                userPickedIndex = m_animationSequence.m_BGTexureList.Count - 1;
             }
-            _material.SetTexture("_BGTex", backgroundSource[userPickedIndex]);
+            m_animationSequence.Stop_AssignToTexture();
+            m_animationSequence.PlayLoop_AssignToTexture(userPickedIndex);
+            _material.SetTexture("_BGTex", m_animationSequence.textureAtThisFrame);
         }
 
 

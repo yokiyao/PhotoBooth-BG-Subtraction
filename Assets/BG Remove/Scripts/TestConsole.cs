@@ -1,7 +1,7 @@
 ﻿//#define USE_TESTCONSOLE
 using System.Collections.Generic;
 using UnityEngine;
-
+using Klak.Video;
 namespace Consolation
 {
     /// <summary>
@@ -77,7 +77,15 @@ namespace Consolation
         //{
         //    DontDestroyOnLoad(transform.gameObject);
         //}
-
+        
+        bool isInDebugMode = false;
+        ProcAmp pa;
+        private void Start()
+        {
+            pa = GetComponent<ProcAmp>();
+            isInDebugMode = pa.isInDebugMode;
+            
+        }
         void OnEnable()
         {
 			Application.logMessageReceived += HandleLog;
@@ -92,7 +100,7 @@ namespace Consolation
 
         void Update()
         {
-            if (Input.GetKeyDown(toggleKey))
+            if (Input.GetKeyDown(toggleKey) && isInDebugMode)
             {
                 visible = !visible;
             }

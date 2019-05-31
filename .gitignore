@@ -14,4 +14,4 @@ Assets/UniGif
 *.sln
 .vs
 Assembly-CSharp.csproj
-
+Assets/Advanced INI Parser

@@ -6,23 +6,24 @@ using Klak.Video;
 public class DBUploader : MonoBehaviour {
 
 
-    public string PHP_filePath;
-    public string ipAddress;
-    [HideInInspector]  public string PHP_url;
+    string PHP_filePath;
+    string ipAddress;
+    string PHP_url;
  
     public string status = "";
     ProcAmp pa;
     bool isInDebugMode;
-    private void Awake()
-    {
-        StartCoroutine(CheckConnection());
-
-    }
+  
 
     private void Start()
     {
         pa = GetComponent<ProcAmp>();
+        ipAddress = pa.ipAddress;
+        PHP_filePath = pa.PHP_filePath;
+        PHP_url = pa.PHP_url;
+        StartCoroutine(CheckConnection());
         isInDebugMode = pa.isInDebugMode;
+    
     }
 
 
@@ -34,7 +35,7 @@ public class DBUploader : MonoBehaviour {
         form.AddField("function", "CheckConnection");
         form.AddField("photoFilePath", "testConnection  " + System.DateTime.Now);
         
-        PHP_url = ipAddress + PHP_filePath;
+        
         if (isInDebugMode) Debug.Log("PHP url: " + PHP_url);
         using (var w = new WWW(PHP_url, form))
         {
@@ -43,6 +44,7 @@ public class DBUploader : MonoBehaviour {
             if (w.error != null)
             {
                 status = "Fail";
+                pa.ShowBugPage("Failed to connect to server");
                 if (isInDebugMode) Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "      status: " + status + "  error: " + w.error );
                 //Debug.Log("not ok");
             }

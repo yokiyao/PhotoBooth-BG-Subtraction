@@ -1,0 +1,6 @@
+[App]
+isInDebugMode = 1
+IPaddress = http://192.168.6.160/
+PHP_filePath = PhotoBooth/PhotoBooth.php
+//true: 1
+//false: 0
