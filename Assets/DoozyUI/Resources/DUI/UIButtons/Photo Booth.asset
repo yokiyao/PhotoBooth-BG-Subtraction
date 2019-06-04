@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8008238e9dde97479aba3c1da256c09, type: 3}
+  m_Name: Photo Booth
+  m_EditorClassIdentifier: 
+  data:
+  - Back to choose
+  - btn_'
+  - btn_-
+  - btn_,
+  - btn_.
+  - btn_/
+  - btn_;
+  - btn_[
+  - btn_\
+  - btn_]
+  - btn_`
+  - btn_=
+  - btn_0
+  - btn_1
+  - btn_2
+  - btn_3
+  - btn_4
+  - btn_5
+  - btn_6
+  - btn_7
+  - btn_8
+  - btn_9
+  - btn_a
+  - btn_b
+  - btn_backspace
+  - btn_c
+  - btn_caps
+  - btn_d
+  - btn_e
+  - btn_f
+  - btn_g
+  - btn_h
+  - btn_i
+  - btn_j
+  - btn_k
+  - btn_l
+  - btn_m
+  - btn_n
+  - btn_o
+  - btn_p
+  - btn_q
+  - btn_r
+  - btn_s
+  - btn_shift
+  - btn_t
+  - btn_u
+  - btn_v
+  - btn_w
+  - btn_x
+  - btn_y
+  - btn_z
+  - Choose GIF
+  - Choose Photo
+  - Email Me
+  - Ending Home
+  - Home
+  - Last BG
+  - Next
+  - Next BG
+  - Open Instruction
+  - Option1
+  - Option2
+  - Option3
+  - Quit Instruction
+  - Retake Photo
+  - Save Photo
+  - Send Email
+  - Shoot
